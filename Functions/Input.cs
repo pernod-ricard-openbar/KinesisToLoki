@@ -39,7 +39,7 @@ namespace PR.Squid.FirehoseToLoki
             catch (Exception e) {
                 // Send back the error to Firehose
                 FirehoseResponseError firehoseResponseError = new FirehoseResponseError(firehoseRequest.RequestId, DateTimeOffset.Now.ToUnixTimeMilliseconds(), e.Message);
-                return new OkObjectResult(firehoseResponseError);
+                return new BadRequestObjectResult(firehoseResponseError);
             }
         }
     }
