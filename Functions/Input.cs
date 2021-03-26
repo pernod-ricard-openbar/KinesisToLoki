@@ -29,6 +29,7 @@ namespace PR.Squid.FirehoseToLoki
                     // Decode the base64 content
                     byte[] recordByte = Convert.FromBase64String(firehoseRecord.Data);
                     string record = Encoding.UTF8.GetString(recordByte);
+                    log.LogInformation($"Firehose content: {record}");
                 }
 
                 // Send back the result to Firehose
