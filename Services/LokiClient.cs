@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
-namespace PR.Squid.FirehoseToLoki
+namespace PR.Squid.KinesisToLoki
 {
     // Basic class to send logs to Loki
     public class LokiClient {

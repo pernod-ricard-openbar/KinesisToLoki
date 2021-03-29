@@ -1,10 +1,10 @@
-namespace PR.Squid.FirehoseToLoki {
+namespace PR.Squid.KinesisToLoki {
 
-    // Basic abtract class to implement firehose response
-    public abstract class FirehoseResponse {
+    // Basic abtract class to implement kinesis response
+    public abstract class KinesisResponse {
 
-        public FirehoseResponse() { }
-        public FirehoseResponse(string requestId, long timestamp) {
+        public KinesisResponse() { }
+        public KinesisResponse(string requestId, long timestamp) {
             RequestId = requestId;
             Timestamp = timestamp;
         }
@@ -13,18 +13,18 @@ namespace PR.Squid.FirehoseToLoki {
         public long Timestamp { get; set; }
     }
     
-    // Basic class for Success firehose response
-    public class FirehoseResponseSuccess: FirehoseResponse {
-        public FirehoseResponseSuccess(): base() { }
-        public FirehoseResponseSuccess(string requestId, long timestamp): base(requestId, timestamp) { }
+    // Basic class for Success kinesis response
+    public class KinesisResponseSuccess: KinesisResponse {
+        public KinesisResponseSuccess(): base() { }
+        public KinesisResponseSuccess(string requestId, long timestamp): base(requestId, timestamp) { }
     }
 
-    // Basic class for Error firehose response
-    public class FirehoseResponseError: FirehoseResponse {
+    // Basic class for Error kinesis response
+    public class KinesisResponseError: KinesisResponse {
 
-        public FirehoseResponseError(): base() { }
-        public FirehoseResponseError(string requestId, long timestamp): base(requestId, timestamp) { }
-        public FirehoseResponseError(string requestId, long timestamp, string errorMessage): base(requestId, timestamp) {
+        public KinesisResponseError(): base() { }
+        public KinesisResponseError(string requestId, long timestamp): base(requestId, timestamp) { }
+        public KinesisResponseError(string requestId, long timestamp, string errorMessage): base(requestId, timestamp) {
             ErrorMessage = errorMessage;
         }
 

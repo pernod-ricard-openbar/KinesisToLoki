@@ -12,16 +12,16 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 
-namespace PR.Squid.FirehoseToLoki
+namespace PR.Squid.KinesisToLoki
 {
     public class Input
     {
         private LokiClient _lokiClient;
-        private string _firehoseAccessKey;
+        private string _kinesisAccessKey;
 
         public Input(LokiClient lokiClient, IConfiguration config) {
             _lokiClient = lokiClient;
-            _firehoseAccessKey = config["FirehoseAccessKey"];
+            _kinesisAccessKey = config["KinesisAccessKey"];
         }
 
         private static void AddLokiLabel(Dictionary<string, string> labels, string labelName, string labelValue)
@@ -32,9 +32,9 @@ namespace PR.Squid.FirehoseToLoki
             }
         }
 
-        // Checks firehose access key
+        // Checks kinesis access key
         private bool CheckAccessKey(string accessKey) {
-            return accessKey.Equals(_firehoseAccessKey);
+            return accessKey.Equals(_kinesisAccessKey);
         }
 
         [FunctionName("Input")]
@@ -42,12 +42,12 @@ namespace PR.Squid.FirehoseToLoki
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "input")] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("Processing a firehose message");
+            log.LogInformation("Processing a kinesis message");
 
             // Checking access key
             StringValues accessKey = new StringValues();
-            req.Headers.TryGetValue("X-Amz-Firehose-Access-Key",  out accessKey);
-            if (!String.IsNullOrEmpty(_firehoseAccessKey)) {
+            req.Headers.TryGetValue("X-Amz-Kinesis-Access-Key",  out accessKey);
+            if (!String.IsNullOrEmpty(_kinesisAccessKey)) {
                 if ((accessKey.Count == 0) || ((accessKey.Count > 0) && ! CheckAccessKey(accessKey[0]))) {
                     return new UnauthorizedResult();
                 }
@@ -55,15 +55,15 @@ namespace PR.Squid.FirehoseToLoki
 
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            FirehoseRequest firehoseRequest = JsonSerializer.Deserialize<FirehoseRequest>(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            KinesisRequest kinesisRequest = JsonSerializer.Deserialize<KinesisRequest>(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             
             try {
                 // Loop through all records
-                foreach (FirehoseRecord firehoseRecord in firehoseRequest.Records) {
+                foreach (KinesisRecord kinesisRecord in kinesisRequest.Records) {
                     // Decode the base64 content
-                    byte[] recordByte = Convert.FromBase64String(firehoseRecord.Data);
+                    byte[] recordByte = Convert.FromBase64String(kinesisRecord.Data);
                     string record = Encoding.UTF8.GetString(recordByte);
-                    //log.LogInformation($"Firehose content: {record}");
+                    //log.LogInformation($"Kinesis content: {record}");
 
                     // Build the Loki entry and send it
                     Dictionary<string, string> labels = new Dictionary<string, string>();
@@ -76,15 +76,15 @@ namespace PR.Squid.FirehoseToLoki
                     
                 }
 
-                // Send back the result to Firehose
-                FirehoseResponseSuccess firehoseResponseSuccess = new FirehoseResponseSuccess(firehoseRequest.RequestId, DateTimeOffset.Now.ToUnixTimeMilliseconds());
-                return new OkObjectResult(firehoseResponseSuccess);
+                // Send back the result to Kinesis
+                KinesisResponseSuccess kinesisResponseSuccess = new KinesisResponseSuccess(kinesisRequest.RequestId, DateTimeOffset.Now.ToUnixTimeMilliseconds());
+                return new OkObjectResult(kinesisResponseSuccess);
 
             }
             catch (Exception e) {
-                // Send back the error to Firehose
-                FirehoseResponseError firehoseResponseError = new FirehoseResponseError(firehoseRequest.RequestId, DateTimeOffset.Now.ToUnixTimeMilliseconds(), e.Message);
-                return new BadRequestObjectResult(firehoseResponseError);
+                // Send back the error to Kinesis
+                KinesisResponseError kinesisResponseError = new KinesisResponseError(kinesisRequest.RequestId, DateTimeOffset.Now.ToUnixTimeMilliseconds(), e.Message);
+                return new BadRequestObjectResult(kinesisResponseError);
             }
         }
     }

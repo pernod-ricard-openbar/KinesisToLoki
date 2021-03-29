@@ -1,10 +1,10 @@
-namespace PR.Squid.FirehoseToLoki {
+namespace PR.Squid.KinesisToLoki {
 
     // Basic class that represents a Firehost record
-    //https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html#requestformat
-    public class FirehoseRecord {
+    //https://docs.aws.amazon.com/kinesis/latest/dev/httpdeliveryrequestresponse.html#requestformat
+    public class KinesisRecord {
 
-        public FirehoseRecord() {
+        public KinesisRecord() {
         }
 
         public string Data { get; set; }

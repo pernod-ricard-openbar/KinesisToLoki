@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace PR.Squid.FirehoseToLoki {
+namespace PR.Squid.KinesisToLoki {
 
     public class LokiStream {
 

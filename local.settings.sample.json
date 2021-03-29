@@ -6,6 +6,6 @@
     "LokiUsername": "xxxxxxxxxxxxxxxxxxxx",
     "LokiPassword": "xxxxxxxxxxxxxxxxxxxx",
     "LokiEndpoint": "https://xxxxxxxxxxxxxxxxxxxx",
-    "FirehoseAccessKey": "xxxxxxxxxxxxxxxxxxxx"
+    "KinesisAccessKey": "xxxxxxxxxxxxxxxxxxxx"
   }
 }

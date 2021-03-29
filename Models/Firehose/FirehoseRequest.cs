@@ -1,19 +1,19 @@
 using System.Collections.Generic;
 
-namespace PR.Squid.FirehoseToLoki {
+namespace PR.Squid.KinesisToLoki {
 
-    // Basic structure to handle incomming Firehose data
-    // https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html#requestformat
-    public class FirehoseRequest {
+    // Basic structure to handle incomming Kinesis data
+    // https://docs.aws.amazon.com/kinesis/latest/dev/httpdeliveryrequestresponse.html#requestformat
+    public class KinesisRequest {
 
         // Constructor
-        public FirehoseRequest() {
-            Records = new List<FirehoseRecord>();
+        public KinesisRequest() {
+            Records = new List<KinesisRecord>();
         }
 
         public string RequestId { get; set; }
         public long Timestamp { get; set; }
-        public List<FirehoseRecord> Records { get; set; }
+        public List<KinesisRecord> Records { get; set; }
 
     }
 }
