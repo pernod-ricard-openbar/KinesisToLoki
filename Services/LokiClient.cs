@@ -27,9 +27,14 @@ namespace PR.Squid.FirehoseToLoki
         }
 
         // Configure HttpClient with authorization headers
-        private void ConfigureHttpClient() { 
-            var creds = Encoding.ASCII.GetBytes($"{_username}:{_password}");
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(creds)); 
+        private void ConfigureHttpClient() {
+            // Adding basic authentication if specified
+            if (!String.IsNullOrEmpty(_username) && !String.IsNullOrEmpty(_password))
+            {
+                var creds = Encoding.ASCII.GetBytes($"{_username}:{_password}");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(creds)); 
+            }
+            
         }
 
         // Sends to Loki
