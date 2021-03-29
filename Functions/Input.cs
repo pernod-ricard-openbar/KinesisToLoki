@@ -46,7 +46,7 @@ namespace PR.Squid.KinesisToLoki
 
             // Checking access key
             StringValues accessKey = new StringValues();
-            req.Headers.TryGetValue("X-Amz-Kinesis-Access-Key",  out accessKey);
+            req.Headers.TryGetValue("X-Amz-Firehose-Access-Key",  out accessKey);
             if (!String.IsNullOrEmpty(_kinesisAccessKey)) {
                 if ((accessKey.Count == 0) || ((accessKey.Count > 0) && ! CheckAccessKey(accessKey[0]))) {
                     return new UnauthorizedResult();
