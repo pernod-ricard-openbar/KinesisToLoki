@@ -10,15 +10,18 @@ using System.Text.Json;
 using System.Text;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 
 namespace PR.Squid.FirehoseToLoki
 {
     public class Input
     {
         private LokiClient _lokiClient;
+        private string _firehoseAccessKey;
 
-        public Input(LokiClient lokiClient) {
-            _lokiClient = lokiClient;      
+        public Input(LokiClient lokiClient, IConfiguration config) {
+            _lokiClient = lokiClient;
+            _firehoseAccessKey = config["FirehoseAccessKey"];
         }
 
         private static void AddLokiLabel(Dictionary<string, string> labels, string labelName, string labelValue)
@@ -29,12 +32,27 @@ namespace PR.Squid.FirehoseToLoki
             }
         }
 
+        // Checks firehose access key
+        private bool CheckAccessKey(string accessKey) {
+            return accessKey.Equals(_firehoseAccessKey);
+        }
+
         [FunctionName("Input")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "input")] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("Processing a firehose message");
+
+            // Checking access key
+            StringValues accessKey = new StringValues();
+            req.Headers.TryGetValue("X-Amz-Firehose-Access-Key",  out accessKey);
+            if (!String.IsNullOrEmpty(_firehoseAccessKey)) {
+                if ((accessKey.Count == 0) || ((accessKey.Count > 0) && ! CheckAccessKey(accessKey[0]))) {
+                    return new UnauthorizedResult();
+                }
+            }
+
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             FirehoseRequest firehoseRequest = JsonSerializer.Deserialize<FirehoseRequest>(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });

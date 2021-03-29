@@ -5,6 +5,7 @@
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
     "LokiUsername": "xxxxxxxxxxxxxxxxxxxx",
     "LokiPassword": "xxxxxxxxxxxxxxxxxxxx",
-    "LokiEndpoint": "https://xxxxxxxxxxxxxxxxxxxx"
+    "LokiEndpoint": "https://xxxxxxxxxxxxxxxxxxxx",
+    "FirehoseAccessKey": "xxxxxxxxxxxxxxxxxxxx"
   }
 }
