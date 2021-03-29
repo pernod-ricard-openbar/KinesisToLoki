@@ -19,7 +19,7 @@ namespace PR.Squid.KinesisToLoki
         // Constructor
         public LokiClient(HttpClient httpClient, IConfiguration config) {
             _httpClient = httpClient;
-            _endpoint = config["LokiEndPoint"];
+            _endpoint = config["LokiEndpoint"];
             _username = config["LokiUsername"];
             _password = config["LokiPassword"];
 
