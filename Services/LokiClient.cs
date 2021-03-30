@@ -44,7 +44,7 @@ namespace PR.Squid.KinesisToLoki
             // We parse the logs
             _cloudFrontLogParser.Load(log);
             // Generate the lokiLogEntry
-            LokiLogEntry lokiLogEntry = new LokiLogEntry(_cloudFrontLogParser.Labels, _cloudFrontLogParser.ContentRaw);
+            LokiLogEntry lokiLogEntry = new LokiLogEntry(_cloudFrontLogParser.Labels, _cloudFrontLogParser);
             // Send to loki using HttpClietn
             string logContent = JsonSerializer.Serialize<LokiLogEntry>(lokiLogEntry, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             StringContent stringContent = new StringContent(logContent, Encoding.UTF8, "application/json");
