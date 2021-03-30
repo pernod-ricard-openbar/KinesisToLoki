@@ -28,6 +28,8 @@ namespace PR.Squid.KinesisToLoki
         {
             if (labelValue != null)
             {
+                // Loki does not like dash "-" in label names
+                labelName = labelName.Replace('-', '_');
                 labels.Add(labelName, labelValue);
             }
         }
