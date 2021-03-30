@@ -38,11 +38,12 @@ namespace PR.Squid.KinesisToLoki
         }
 
         // Sends to Loki
-        public async Task SendLogsAsync(LokiLogEntry lokiLogEntry) {
+        public async Task<bool> SendLogsAsync(LokiLogEntry lokiLogEntry) {
             string logContent = JsonSerializer.Serialize<LokiLogEntry>(lokiLogEntry, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             StringContent stringContent = new StringContent(logContent, Encoding.UTF8, "application/json");
             stringContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            await _httpClient.PostAsync(_endpoint, stringContent);
+            var response =  await _httpClient.PostAsync(_endpoint, stringContent);
+            return response.IsSuccessStatusCode;
         }
     }
 }
