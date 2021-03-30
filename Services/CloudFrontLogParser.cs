@@ -1,17 +1,39 @@
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
 
 namespace PR.Squid.KinesisToLoki {
-    public class CloudFrontLogRecord {
-        public CloudFrontLogRecord(string[] recordFragments) {
-            Content = new Dictionary<string, string>();
-            int i = 0;
-            foreach(string recordFragment in recordFragments) {
-                Content.Add(Fields[i], recordFragment);
-                i++;
+    public class CloudFrontLogParser {
+
+        private List<string> _fieldsToDrop;
+
+        public CloudFrontLogParser(IConfiguration config) {
+            // Dictionary to store content
+            ContentDictionary = new Dictionary<string, string>();
+            // Dropped fields
+            _fieldsToDrop = new List<string>(config["KinesisFieldsToDrop"].Split(','));
+        }
+
+        // Load the data
+        public void Load(string record) {
+            // Clear the content
+            ContentDictionary.Clear();
+            ContentRaw = string.Empty;
+
+            // Loop through the content of the record
+            string[] recordFragments = record.Split('\t');
+            for (int i = 0; i < recordFragments.Length; i++) {
+                if (!_fieldsToDrop.Contains(Fields[i])) {
+                    ContentDictionary.Add(Fields[i], recordFragments[i]);
+                    ContentRaw += recordFragments[i];
+                    if (i != recordFragments.Length - 1) {
+                        ContentRaw += "\t";
+                    }
+                } 
             }
         }
 
-        public Dictionary<string, string> Content { get; set; }
+        public Dictionary<string, string> ContentDictionary { get; set; }
+        public string ContentRaw { get; set; }
 
         // Fields, ordered, as they are received from Kinesis
         private static string[] Fields = {

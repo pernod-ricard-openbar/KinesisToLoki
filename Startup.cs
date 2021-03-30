@@ -14,6 +14,7 @@ namespace PR.Squid.KinesisToLoki
         {
              builder.Services.AddHttpClient();
              builder.Services.AddSingleton<LokiClient>();
+             builder.Services.AddSingleton<CloudFrontLogParser>();
         }
         
         public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)

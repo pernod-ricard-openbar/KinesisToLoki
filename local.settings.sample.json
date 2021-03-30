@@ -6,6 +6,7 @@
     "LokiUsername": "xxxxxxxxxxxxxxxxxxxx",
     "LokiPassword": "xxxxxxxxxxxxxxxxxxxx",
     "LokiEndpoint": "https://xxxxxxxxxxxxxxxxxxxx",
-    "KinesisAccessKey": "xxxxxxxxxxxxxxxxxxxx"
+    "KinesisAccessKey": "xxxxxxxxxxxxxxxxxxxx",
+    "KinesisFieldsToDrop": "cs-headers,cs-header-names,cs-headers-count"
   }
 }
