@@ -4,13 +4,35 @@ using Microsoft.Extensions.Configuration;
 namespace PR.Squid.KinesisToLoki {
     public class CloudFrontLogParser {
 
+        private string[] _fieldsReceived;
         private List<string> _fieldsToDrop;
+        private string[] _fieldsToLabel;
+        private Dictionary<string, string> _customLabels { get; set; }
+
+        public Dictionary<string, string> ContentDictionary { get; set; }
+        public string ContentRaw { get; set; }
+        public Dictionary<string, string> Labels { get; set; }
 
         public CloudFrontLogParser(IConfiguration config) {
             // Dictionary to store content
             ContentDictionary = new Dictionary<string, string>();
-            // Dropped fields
+            // Fields that are received (sent by Kinesis)
+            _fieldsReceived = config["KinesisFieldsReceived"].Split(',');
+            // Fields received that will be dropped (not sent to Loki)
             _fieldsToDrop = new List<string>(config["KinesisFieldsToDrop"].Split(','));
+            // Fields to add as label
+            _fieldsToLabel = config["KinesisFieldsToLabel"].Split(',');
+            // Labels
+            Labels = new Dictionary<string, string>();
+            // Custom label that can be added optionally 
+            _customLabels = new Dictionary<string, string>();
+            string[] customLabels = config["CustomLabels"].Split(';');
+            foreach(string customLabel in customLabels) {
+                string[] customLabelParsed = customLabel.Split(',');
+                if (customLabelParsed.Length == 2) {
+                    _customLabels.Add(customLabelParsed[0], customLabelParsed[1]);
+                }
+            }
         }
 
         // Load the data
@@ -18,65 +40,37 @@ namespace PR.Squid.KinesisToLoki {
             // Clear the content
             ContentDictionary.Clear();
             ContentRaw = string.Empty;
+            Labels.Clear();
 
-            // Loop through the content of the record
+            // Loop through the content of the record to generate the content that will be sent to Loki
             string[] recordFragments = record.Split('\t');
             for (int i = 0; i < recordFragments.Length; i++) {
-                if (!_fieldsToDrop.Contains(Fields[i])) {
-                    ContentDictionary.Add(Fields[i], recordFragments[i]);
-                    ContentRaw += recordFragments[i];
-                    if (i != recordFragments.Length - 1) {
-                        ContentRaw += "\t";
-                    }
-                } 
+                // We only add the fields that we do not want to drop
+                if (!_fieldsToDrop.Contains(_fieldsReceived[i])) {
+                    ContentDictionary.Add(_fieldsReceived[i], recordFragments[i]);
+                    ContentRaw += recordFragments[i] + "\t";
+                }
             }
+            ContentRaw = ContentRaw.TrimEnd('\t'); // Trim last tab
+
+            // Generates the labels
+            GenerateLabels();
         }
 
-        public Dictionary<string, string> ContentDictionary { get; set; }
-        public string ContentRaw { get; set; }
-
-        // Fields, ordered, as they are received from Kinesis
-        private static string[] Fields = {
-            "timestamp",
-            "c-ip",
-            "time-to-first-byte",
-            "sc-status",
-            "sc-bytes",
-            "cs-method",
-            "cs-protocol",
-            "cs-host",
-            "cs-uri-stem",
-            "cs-bytes",
-            "x-edge-location",
-            "x-edge-request-id",
-            "x-host-header",
-            "time-taken",
-            "cs-protocol-version",
-            "c-ip-version",
-            "cs-user-agent",
-            "cs-referer",
-            "cs-cookie",
-            "cs-uri-query",
-            "x-edge-response-result-type",
-            "x-forwarded-for",
-            "ssl-protocol",
-            "ssl-cipher",
-            "x-edge-result-type",
-            "fle-encrypted-fields",
-            "fle-status",
-            "sc-content-type",
-            "sc-content-len",
-            "sc-range-start",
-            "sc-range-end",
-            "c-port",
-            "x-edge-detailed-result-type",
-            "c-country",
-            "cs-accept-encoding",
-            "cs-accept",
-            "cache-behavior-path-pattern",
-            "cs-headers",
-            "cs-header-names",
-            "cs-headers-count",
-        };
+        // Generates loki labels based on the list of fields that should be added as label (variable KinesisFieldsToLabel)
+        private void GenerateLabels() {
+            // Add fields as labels
+            foreach (string labelName in _fieldsToLabel) {
+                string labelValue = ContentDictionary.GetValueOrDefault<string, string>(labelName, null);
+                if (labelValue != null) {
+                    // Loki does not like dash "-" in label names
+                    Labels.Add(labelName.Replace('-', '_'), labelValue);
+                }
+            }
+            // Add the custom labels
+            foreach (var customLabel in _customLabels) {
+                Labels.Add(customLabel.Key, customLabel.Value);
+            }
+        }
     }
 }
