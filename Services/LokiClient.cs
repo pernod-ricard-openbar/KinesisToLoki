@@ -16,6 +16,7 @@ namespace PR.Squid.KinesisToLoki
         private string _endpoint;
         private string _username;
         private string _password;
+        private string _format; // could be json or raw
 
         // Constructor
         public LokiClient(HttpClient httpClient, CloudFrontLogParser cloudFrontLogParser, IConfiguration config) {
@@ -23,7 +24,8 @@ namespace PR.Squid.KinesisToLoki
             _cloudFrontLogParser = cloudFrontLogParser;
             _endpoint = config["LokiEndpoint"];
             _username = config["LokiUsername"];
-            _password = config["LokiPassword"]; 
+            _password = config["LokiPassword"];
+            _format = config["LokiFormat"];
 
             ConfigureHttpClient();
         }
@@ -44,8 +46,8 @@ namespace PR.Squid.KinesisToLoki
             // We parse the logs
             _cloudFrontLogParser.Load(log);
             // Generate the lokiLogEntry
-            LokiLogEntry lokiLogEntry = new LokiLogEntry(_cloudFrontLogParser.Labels, _cloudFrontLogParser);
-            // Send to loki using HttpClietn
+            LokiLogEntry lokiLogEntry = new LokiLogEntry(_cloudFrontLogParser.Labels, _cloudFrontLogParser, _format);
+            // Send to loki using HttpClient
             string logContent = JsonSerializer.Serialize<LokiLogEntry>(lokiLogEntry, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             StringContent stringContent = new StringContent(logContent, Encoding.UTF8, "application/json");
             stringContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");

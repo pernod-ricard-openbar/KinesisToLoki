@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace PR.Squid.KinesisToLoki {
 
@@ -18,9 +19,16 @@ namespace PR.Squid.KinesisToLoki {
             Streams.Add(lokiStream);
         }
 
-        public LokiLogEntry(Dictionary<string, string> labels, CloudFrontLogParser cloudFrontLogParser) {
+        public LokiLogEntry(Dictionary<string, string> labels, CloudFrontLogParser cloudFrontLogParser, string format) {
             string epochNanoSeconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString() + "000000";
-            LokiStream lokiStream = new LokiStream(labels, epochNanoSeconds, cloudFrontLogParser.ContentRaw);
+            LokiStream lokiStream;
+            if (format == "raw") {
+                lokiStream = new LokiStream(labels, epochNanoSeconds, cloudFrontLogParser.ContentRaw);
+            }
+            else { // json
+                string json = JsonSerializer.Serialize<Dictionary<string,string>>(cloudFrontLogParser.ContentDictionary);
+                lokiStream = new LokiStream(labels, epochNanoSeconds, json);
+            }
             Streams = new List<LokiStream>();
             Streams.Add(lokiStream);
         }
