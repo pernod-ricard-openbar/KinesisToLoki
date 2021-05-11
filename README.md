@@ -1,5 +1,5 @@
 # Kinesis to Loki
-A simple Azure Function that receives data from AWS Kinesis Kinesis and sends them to Loki.
+A simple Azure Function that receives data from AWS Kinesis Firehose and sends them to Loki.
 
 ## Config parameters in local.settings.json
 
